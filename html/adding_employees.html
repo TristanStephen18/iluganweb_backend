@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adding Employees</title>
+  </head>
+  <body>
+    <a href="homepage.html">Home</a>
+    <div class="form-container">
+        <form id="add-employees-form">
+            <div class="input-field">
+                <label for="email">Email: </label>
+                <input type="text" name="email" id="email">
+            </div>
+            <div class="input-field"></div>
+                <label for="password">Password: </label>
+                <input type="text" name="password" id="password">
+            </div>
+            <label for="employee_type">Choose role:</label>
+            <select name="employee_type" id="employee_type">
+            <option value="conductor">Conductor</option>
+            <option value="inspector">Inspector</option>
+            </select>
+            <div class="input-field"></div>
+                <label for="name">Name: </label>
+                <input type="text" name="name" id="name">
+            </div>
+
+            <button id="add_employee">Add Employee</button>
+        </form>
+    </div>
+  </body>
+  <script>
+    const sub = document.getElementById("add_employee");
+
+    sub.addEventListener('click', (e)=>{
+        alert(document.getElementById("employee_type").value);
+    });
+  </script>
+</html>

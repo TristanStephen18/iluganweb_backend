@@ -1,0 +1,47 @@
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    color: black;
+}
+
+label{
+    font-size: 30px;
+}
+
+input{
+    margin-top: 10px;
+    font-size: 20px;
+    height: 30px;
+    border-radius: 20px;
+    background-color: rgba(42, 41, 41, 0.689);
+    color: white;
+    text-align: center;
+}
+
+button{
+    text-transform: capitalize;
+    margin-top: 20px;
+    font-size: 20px;
+    background-color: rgba(42, 41, 41, 0.689);
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 20px;
+    width: 200px;
+    height: 40px;
+    color: white;
+}
+
+button:hover{
+    background-color: white;
+    color: black;
+}
+
+
+
+
+
+
+

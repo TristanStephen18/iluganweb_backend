@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Add Map</title>
+
+    <style>
+      #map {
+        padding: 20px;
+        border-radius: 30px;
+        height: 500px;
+        width: 900px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>My Google Maps Demo</h3>
+    <!--The div element for the map -->
+    <div id="map"></div>
+
+    <label for="lat">Lat: </label>
+    <input type="text" name="lat" id="lat" />
+    <label for="long">Long: </label>
+    <input type="text" name="long" id="long" />
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
+      defer
+    ></script>
+
+    <script>
+      // getting the latitude and longtitude of a location
+      let currentMarker = null;
+      let map;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 16.056575294903435, lng: 120.32326714096962 },
+          zoom: 14,
+        });
+
+        map.addListener("click", (e) => {
+          const position = {
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          };
+
+          const lat = e.latLng.lat();
+          const lng = e.latLng.lng();
+
+          document.getElementById("lat").value = lat;
+          document.getElementById("long").value = lng;
+
+          if (currentMarker) {
+            currentMarker.setMap(null); // Remove the existing marker
+          }
+
+          currentMarker = new google.maps.Marker({
+            position: position,
+            map: map,
+            icon: {
+              url: "icon.png",
+              scaledSize: new google.maps.Size(30, 30), // scaled size
+            },
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

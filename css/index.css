@@ -1,0 +1,32 @@
+body {
+    background-color: black;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    color: white;
+}
+
+ h1 {
+    text-transform: capitalize;
+    font-size: 50px;
+}
+
+button {
+    padding: 20px;
+    background-color: transparent;
+    border: 2px solid white;
+    border-radius: 50px;
+    font-size: 30px;
+    color: white;
+    width: 300px;
+}
+
+button:hover{
+    background-color: white;
+    color: black;
+}

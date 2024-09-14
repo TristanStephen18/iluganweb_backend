@@ -1,0 +1,19 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.map-container{
+    background-color: antiquewhite;
+    border-radius: 30px;
+}
+
+#map{
+    padding: 20px;
+    border-radius: 30px;
+    height: 500px;
+    width: 900px;
+}

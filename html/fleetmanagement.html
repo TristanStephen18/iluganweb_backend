@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fleet Management</title>
+    <link rel="stylesheet" href="../css/fleetm.css" />
+  </head>
+  <body>
+    <a href="homepage.html">Home</a>
+
+    <div class="main">
+      <div class="title">
+        <h2>Fleet Vehicles</h2>
+      </div>
+      <form action="" id="add-vehicle-form">
+        <div class="input-field">
+            <label for="bus_number">Bus Number</label>
+            <input type="text" name="bus_number" id="bus_number">
+        </div>
+        <div class="input-field"></div>
+            <label for="plate_number">Plate Number</label>
+            <input type="text" name="plate_number" id="plate_number">
+        </div>
+        <div class="input-field"></div>
+            <label for="destination">Destination</label>
+            <input type="text" name="destination" id="destination">
+        </div>
+        <button id="add_vehicle">Add to Fleet</button>
+      </form>
+      <div id="map"></div>
+    </div>
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
+    defer>
+    </script>
+    <script>
+
+        // getting the latitude and longtitude of a location
+        let currentMarker = null;
+        let map;
+        let selectedLat=null; 
+        let selectedLng =null;
+  
+        function initMap() {
+          map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 16.056575294903435, lng: 120.32326714096962 },
+            zoom: 10,
+          });
+  
+          map.addListener("click", (e) => {
+  
+            const position = {
+                      lat: e.latLng.lat(),
+                      lng: e.latLng.lng()
+                  };
+            
+            selectedLat = e.latLng.lat();
+            selectedLng = e.latLng.lng();
+
+          });
+
+        }
+      </script>
+      <script src="../scripts/fleetmanagement.js" type="module"></script>
+  </body>
+</html>

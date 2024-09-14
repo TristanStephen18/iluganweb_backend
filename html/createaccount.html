@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../css/signup.css" />
+    <title>Creating an account</title>
+  </head>
+  <body>
+    <div class="container">
+      <form id="signup-form">
+        <div class="input-field">
+          <label for="company" id="company" required>Company Name: </label>
+          <input type="text" id="company" />
+        </div>
+        <br />
+        <p>Select your terminal location on the map</p>
+        <div id="map"></div>
+
+        <br />
+        <div class="input-field">
+          <label for="email">Company Email:</label>
+          <input type="email" id="email" required />
+        </div>
+        <br />
+        <div class="input-field">
+          <label for="password">Password:</label>
+          <input type="password" id="password" required />
+        </div>
+        <br />
+        <button id="signupbtn">Create Account</button>
+      </form>
+    </div>
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
+      defer
+    ></script>
+    <script>
+      let currentMarker = null;
+      let map;
+      let selectedLat = null;
+      let selectedLng = null;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 16.056575294903435, lng: 120.32326714096962 },
+          zoom: 14,
+        });
+
+        map.addListener("click", (e) => {
+          const position = {
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          };
+
+          selectedLat = e.latLng.lat();
+          selectedLng = e.latLng.lng();
+
+          // document.getElementById("lat").value = lat;
+          // document.getElementById("long").value = lng;
+
+          if (currentMarker) {
+            currentMarker.setMap(null); 
+          }
+
+          currentMarker = new google.maps.Marker({
+            position: position,
+            map: map,
+            icon: {
+              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            },
+          });
+        });
+      }
+    </script>
+    <script src="../scripts/signup.js" type="module"></script>
+  </body>
+</html>
