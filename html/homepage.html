@@ -1,29 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/home.css" />
     <title>Ilugan Homepage</title>
-</head>
-<body>
+  </head>
+  <body>
     <button id="logout">Log out</button>
-    <br>
+    <button id="addemp">Add employees</button>
+    <br />
     <button id="fleetbtn">Manage Fleet</button>
     <div class="container">
-        <div class="title">
-            <h2>WELCOME TO ILUGAN</h2>
-        </div>
-        <div class="map-container">
-            <gmp-map center="16.056575294903435, 120.32326714096962" zoom="14" map-id="DEMO_MAP_ID" id="map">
-            </gmp-map>
-        </div>
+      <div class="title">
+        <h2>WELCOME TO ILUGAN</h2>
+      </div>
+      <div class="map-container">
+        <gmp-map
+          center="16.056575294903435, 120.32326714096962"
+          zoom="14"
+          map-id="DEMO_MAP_ID"
+          id="map"
+        >
+        </gmp-map>
+      </div>
     </div>
     <div class="map"></div>
     <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&loading=async&libraries=maps,marker&v=beta" defer>
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&loading=async&libraries=maps,marker&v=beta"
+      defer
+    ></script>
+    <script>
+      const btnadd = document.getElementById("addemp");
+
+      btnadd.addEventListener('click', (e)=>{
+        window.location.assign("adding_employees.html");
+      });
     </script>
     <script type="module" src="../scripts/homepage.js"></script>
-</body>
+  </body>
 </html>

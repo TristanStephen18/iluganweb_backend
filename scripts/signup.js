@@ -60,7 +60,6 @@ snpform.addEventListener("submit", (e) => {
       }
     }
 
-
     createUserWithEmailAndPassword(auth, email, password)
       .then((cred) => {
         addData(

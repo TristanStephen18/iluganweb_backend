@@ -29,12 +29,26 @@
         <button id="add_vehicle">Add to Fleet</button>
       </form>
       <div id="map"></div>
+      <div class="bus-counter">
+        <h4>Number of buses</h4>
+        <div id="number_of_buses">Sample</div>
+      </div>
+      <div class="parked-buses">
+        <h4>Parked Buses</h4>
+        <div class="parked_b" id="parked_b"></div>
+      </div>
+      <div class="moving_buses">
+        <h4>Moving</h4>
+        <div class="moving" id="moving"></div>
+      </div>
     </div>
     <script
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
     defer>
     </script>
     <script>
+      // const t = document.getElementById('number_of_buses');
+      // alert(t.innerText);
 
         // getting the latitude and longtitude of a location
         let currentMarker = null;

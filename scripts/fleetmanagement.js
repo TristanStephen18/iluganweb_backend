@@ -36,6 +36,9 @@ let terminalLat = null;
 let terminalLng = null;
 let userid = null;
 let buses = [];
+let bus_counter = 0;
+let moving_buses_counter = 0;
+let parked_buses = 0;
 
 // Utility function to add markers to the map
 function addBusToMap(position) {
@@ -80,7 +83,7 @@ async function addDataToFirestore(
   lng
 ) {
   try {
-    const location = new GeoPoint(16.14018003087302, 119.98978390654416);
+    const location = new GeoPoint(terminalLat, terminalLng);
     await setDoc(doc(db, `companies/${companyId}/buses`, plateNumber), {
       destination,
       terminal_location: location,
@@ -104,7 +107,9 @@ function checkUser() {
     if (user) {
       console.log("User is logged in:", user.uid);
       userid = user.uid;
-      await Promise.all([getBuses(userid), getTerminalLocation(userid)]);
+      // 
+      getTerminalLocation(userid);
+      getBuses(userid);
     } else {
       console.log("No user is signed in.");
       window.location.assign("login.html");
@@ -138,6 +143,10 @@ async function getTerminalLocation(uid) {
 // Fetch Buses
 async function getBuses(companyId) {
   buses = []; // Reset buses array
+  bus_counter = 0; // Reset the counters
+  moving_buses_counter = 0;
+  parked_buses = 0;
+
   try {
     const documentRef = collection(db, `companies/${companyId}/buses`);
     const snapshot = await getDocs(documentRef);
@@ -154,8 +163,25 @@ async function getBuses(companyId) {
             lat: busLocation.latitude,
             lng: busLocation.longitude,
           };
-          addBusToMap(position);
+          bus_counter++; // Increment total bus counter
+          console.log(`buslat: ${busLocation.latitude} buslong: ${busLocation.longitude}`);
+          console.log(`${terminalLat}, ${terminalLng}`);
+
+          if (
+            busLocation.latitude !== terminalLat &&
+            busLocation.longitude !== terminalLng
+          ) {
+            moving_buses_counter++; // Count moving buses
+          } else if (
+            busLocation.latitude === terminalLat &&
+            busLocation.longitude === terminalLng
+          ) {
+            parked_buses++; // Count parked buses
+          }
+
+          addBusToMap(position); // Add bus marker to the map
         }
+
         console.log(
           `Bus Number: ${busData.bus_number}, Plate: ${busData.plate_number}`
         );
@@ -164,7 +190,30 @@ async function getBuses(companyId) {
   } catch (error) {
     console.error("Error fetching buses: ", error);
   }
+
+  // Update HTML elements
+  const tracking_buses = document.getElementById('number_of_buses');
+  const parked_buses_counter = document.getElementById('parked_b');
+  const moving_buses_element = document.getElementById('moving'); // Rename to avoid conflicts
+
+  // Update the counters in the UI
+  tracking_buses.innerText = bus_counter;
+  parked_buses_counter.innerText = parked_buses;
+  moving_buses_element.innerText = moving_buses_counter;
 }
 
+ const tracking_buses = document.getElementById('number_of_buses');
+  const parked_buses_counter = document.getElementById('parked_b');
+  const moving_buses = document.getElementById('moving');
+  
+  // console.log(bus_counter);
+  // console.log(tracking_buses.value);
+  console.log(moving_buses_counter);
+  console.log(parked_buses);
+
+  tracking_buses.innerText = bus_counter;
+  parked_buses_counter.innerText = parked_buses;
+
+  tracking_buses.value = `${bus_counter}`;
 // Initialize on page load
 window.onload = checkUser;
