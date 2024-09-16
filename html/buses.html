@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/buses.css">
+    <title>FleetVehicles</title>
+</head>
+<body>
+  <a href="homepage.html">Back to home</a>
+    <form action="" id="add-vehicle-form">
+        <div class="form-container">
+          <div class="input-field">
+            <label for="bus_number">Bus Number</label>
+            <input type="text" name="bus_number" id="bus_number" required>
+          </div>
+          <div class="input-field">
+            <label for="plate_number">Plate Number</label>
+            <input type="text" name="plate_number" id="plate_number" required>
+          </div>
+          <div class="input-field">
+            <label for="destination">Destination</label>
+            <input type="text" name="destination" id="destination" required>
+          </div>
+          <div class="input-field">
+            <label for="departure">Departure Time</label>
+            <input type="time" name="departure" id="departure" required>
+          </div>
+          <div class="input-field">
+            <label for="end">End of Operation</label>
+            <input type="time" name="end" id="end" required>
+          </div>
+          <button id="add_vehicle">Add to Fleet</button>
+        </div>
+      </form>
+      <table border="1">
+        <thead>
+          <th>Bus Number</th>
+          <th>Plate Number</th>
+          <th>Operation time</th>
+          <th>Destination</th>
+          <th>Available Seats</th>
+          <th>Reserved Seats</th>
+          <th>Occupied Seats</th>
+          <th>Assigned Conductor</th>
+          <th>Current Location</th>
+        </thead>
+        <tbody id="buses_table">
+
+        </tbody>
+      </table>
+      <script type="module" src="../scripts/buses.js"></script>
+</body>
+</html>

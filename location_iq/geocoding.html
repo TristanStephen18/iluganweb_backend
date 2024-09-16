@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocationIQ Search</title>
+</head>
+<body>
+    <h2>Search for a Location</h2>
+    <!-- Input field for search query -->
+    <form id="locationForm">
+        <label for="searchQuery">Enter a location:</label>
+        <input type="text" id="searchQuery" placeholder="Enter location" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Div to display the results -->
+    <div id="locationResults"></div>
+
+    <script>
+        // Add event listener to the form submission
+        document.getElementById('locationForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the form from submitting the traditional way
+
+            // Get the value from the input field
+            const query = document.getElementById('searchQuery').value;
+            
+            // Your API access token
+            const apiKey = 'pk.e6e28e751bd0e401a2a07cb0cbe2e6e4'; // Replace with your actual API key
+            
+            // URL encode the query and create the API URL
+            const apiUrl = `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(query)}&format=json`;
+            
+            // Fetch the data from the API
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Display the result
+                    const locationResults = document.getElementById('locationResults');
+                    if (data.length > 0) {
+                        const displayData = data.map(result => `
+                            <div>
+                                <p><strong>Address:</strong> ${result.display_name}</p>
+                                <p><strong>Latitude:</strong> ${result.lat}</p>
+                                <p><strong>Longitude:</strong> ${result.lon}</p>
+                            </div>
+                            <hr>
+                        `).join('');
+                        locationResults.innerHTML = displayData;
+                    } else {
+                        locationResults.innerHTML = '<p>No results found</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('locationResults').innerHTML = '<p>An error occurred while fetching the data.</p>';
+                });
+        });
+
+        //https://us1.locationiq.com/v1/reverse?keypk.e6e28e751bd0e401a2a07cb0cbe2e6e4=&lat=51.50344025&lon=-0.12770820958562096&format=json&
+    </script>
+</body>
+</html>

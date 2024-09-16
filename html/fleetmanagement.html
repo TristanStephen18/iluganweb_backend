@@ -3,79 +3,121 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+    ></script>
     <title>Fleet Management</title>
     <link rel="stylesheet" href="../css/fleetm.css" />
   </head>
   <body>
     <a href="homepage.html">Home</a>
+    <!-- <div id="markerInfoContainer" class="marker-info hidden">
+      <h4>Marker Location</h4>
+      <p id="markerLocation"></p>
+      <button id="closeMarkerInfo">Close</button>
+    </div> -->
+    <div id="busInfoContainer" class="bus-info hidden">
+      <h4>Bus info</h4>
+      <div class="bus-details">
+        <img src="bus_icon.png" alt="Bus" class="bus-image">
+        <div>
+          <p>Bus Number: </p>
+          <p style="font-weight: bold;font-size: 20px;" id="busNumber">Bus Number</p>
+          <br>
+          <p>Plate NUmber: </p>
+          <p id="plateNumber">Plate Number</p>
+        </div>
+      </div>
+    
+      <div class="locations">
+        <div>
+          <p style="font-weight: bold;">Currently at: </p>
+          <p id="currentLocation">2972 Westheimer</p>
+        </div>
+        <div>
+          <p style="font-weight: bold;">Going to: </p>
+          <p id="destination">8502 Preston</p>
+        </div>
+      </div>
+    
+      <div class="seats-info">
+        <div class="seats">
+          <p style="font-weight: bold;">Available seats</p>
+          <p id="availableSeats">23</p>
+        </div>
+        <div class="seats reserved">
+          <p style="font-weight: bold;">Reserved seats</p>
+          <p id="reservedSeats">23</p>
+        </div>
+      </div>
+    
+      <div class="driver-info">
+        <img src="driver_icon.jfif" alt="Driver" class="driver-icon">
+        <p id="driverName">Driver</p>
+      </div>
+    
+      <div class="conductor-info">
+        <img src="conductor_icon.jpg" alt="Conductor" class="conductor-icon">
+        <p id="conductorName">Conductor</p>
+      </div>
+    
+      <button id="closeBusInfo">Close</button>
+    </div>
+    
 
-    <div class="main">
-      <div class="title">
+    <div class="main-container">
+      <div class="left-container">
         <h2>Fleet Vehicles</h2>
+        <div id="map"></div>
       </div>
-      <form action="" id="add-vehicle-form">
-        <div class="input-field">
-            <label for="bus_number">Bus Number</label>
-            <input type="text" name="bus_number" id="bus_number">
+      
+      <div class="right-container">
+        <div class="status-card">
+          <h4>Total Buses</h4>
+          <div id="number_of_buses">50</div>
         </div>
-        <div class="input-field"></div>
-            <label for="plate_number">Plate Number</label>
-            <input type="text" name="plate_number" id="plate_number">
+        <div class="status-card">
+          <h4>Moving Buses</h4>
+          <div id="moving">25</div>
         </div>
-        <div class="input-field"></div>
-            <label for="destination">Destination</label>
-            <input type="text" name="destination" id="destination">
+        <div class="status-card">
+          <h4>Park Buses</h4>
+          <div id="parked_b">20</div>
         </div>
-        <button id="add_vehicle">Add to Fleet</button>
-      </form>
-      <div id="map"></div>
-      <div class="bus-counter">
-        <h4>Number of buses</h4>
-        <div id="number_of_buses">Sample</div>
-      </div>
-      <div class="parked-buses">
-        <h4>Parked Buses</h4>
-        <div class="parked_b" id="parked_b"></div>
-      </div>
-      <div class="moving_buses">
-        <h4>Moving</h4>
-        <div class="moving" id="moving"></div>
       </div>
     </div>
+
     <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
-    defer>
-    </script>
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
+      defer
+    ></script>
+
     <script>
-      // const t = document.getElementById('number_of_buses');
-      // alert(t.innerText);
+      let currentMarker = null;
+      let map;
+      let selectedLat = null;
+      let selectedLng = null;
 
-        // getting the latitude and longtitude of a location
-        let currentMarker = null;
-        let map;
-        let selectedLat=null; 
-        let selectedLng =null;
-  
-        function initMap() {
-          map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: 16.056575294903435, lng: 120.32326714096962 },
-            zoom: 10,
-          });
-  
-          map.addListener("click", (e) => {
-  
-            const position = {
-                      lat: e.latLng.lat(),
-                      lng: e.latLng.lng()
-                  };
-            
-            selectedLat = e.latLng.lat();
-            selectedLng = e.latLng.lng();
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 16.056575294903435, lng: 120.32326714096962 },
+          zoom: 10,
+        });
 
-          });
+        map.addListener("click", (e) => {
+          const position = {
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          };
 
-        }
-      </script>
-      <script src="../scripts/fleetmanagement.js" type="module"></script>
+          selectedLat = e.latLng.lat();
+          selectedLng = e.latLng.lng();
+        });
+      }
+    </script>
+
+    <script src="../scripts/fleetmanagement.js" type="module"></script>
   </body>
 </html>

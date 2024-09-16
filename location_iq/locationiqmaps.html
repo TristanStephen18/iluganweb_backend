@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://tiles.locationiq.com/v3/libs/openlayers/8.2.0/ol.css" type="text/css">
+    <script src="https://tiles.locationiq.com/v3/libs/openlayers/8.2.0/ol.js"></script>
+    <style>
+        body { margin: 0px; padding: 0px; }
+        #map { position: absolute; top: 0px; bottom: 0px; width: 100%; }
+    </style>
+    <script src="https://tiles.locationiq.com/v3/libs/olms/12.0.0/olms.js" type="text/javascript"></script>
+    <title>Directions on Map</title>
+</head>
+<body>
+    <div id="map"></div>
+    <script type="text/javascript">
+        var key = 'pk.aa7f5d0539c5675b7f3429402939d8fa'; // Insert your LocationIQ access token here
+        var styleJson = 'https://tiles-staging.locationiq.com/v3/streets/vector.json?key=' + key;
+
+        const map = new ol.Map({
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.fromLonLat([-122.42, 37.779]), // Center the map on San Francisco
+                zoom: 12
+            })
+        });
+
+        olms.apply(map, styleJson);
+
+        // Function to draw a route on the map
+        function drawRoute(routeCoordinates) {
+            var route = new ol.geom.LineString(routeCoordinates).transform('EPSG:4326', 'EPSG:3857');
+
+            var routeFeature = new ol.Feature({
+                geometry: route,
+            });
+
+            var routeLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: [routeFeature]
+                }),
+                style: new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#ffcc33',
+                        width: 4
+                    })
+                })
+            });
+
+            map.addLayer(routeLayer);
+        }
+
+        // Sample coordinates for directions
+        
+        var coordinates = '-122.42,37.779;-122.414,37.781'; // Example start and end points
+
+        // Fetch directions from LocationIQ
+        fetch(`https://us1.locationiq.com/v1/directions/driving/${coordinates}?key=${key}&steps=true&geometries=geojson&overview=full`)
+            .then(response => response.json())
+            .then(data => {
+                var route = data.routes[0].geometry.coordinates; // Get the route coordinates
+
+                // Convert to an array of [longitude, latitude] for OpenLayers
+                var routeCoordinates = route.map(point => [point[0], point[1]]);
+                
+                drawRoute(routeCoordinates); // Draw the route on the map
+            })
+            .catch(error => {
+                console.error('Error fetching directions:', error);
+            });
+    </script>
+</body>
+</html>
