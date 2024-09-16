@@ -70,7 +70,6 @@ async function showBusInfo(busNumber, plateNumber, current_loc, seats_avail, sea
   document.getElementById("destination").innerText = destin;
   document.getElementById("availableSeats").innerText = seats_avail;
   document.getElementById("reservedSeats").innerText = seats_res;
-  // document.getElementById("occupiedSeats").innerText = occu_seats;
   document.getElementById("conductorName").innerText = conduct;
   document.getElementById("driverName").innerText = "Driver"; 
 

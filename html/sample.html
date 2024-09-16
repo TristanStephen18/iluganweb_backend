@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../css/buses.css" />
     <title>FleetVehicles</title>
-    <style>
-      table{
-        text-align: center;
-      }
-    </style>
   </head>
   <body>
     <a href="homepage.html">Back to home</a>
+    <button id="ha">clickme</button>
     <form action="" id="add-vehicle-form">
       <div class="form-container">
         <div class="input-field">
@@ -28,12 +24,6 @@
           <select name="destination" id="destination" required>
               <option value="" disabled selected>Select a destination</option>
           </select>
-      </div>
-      <div class="input-field">
-        <label for="end_terminal">Destination Terminal: </label>
-        <select name="end_terminal" id="end_terminal">
-          <option value="" disabled selected>Select Terminal</option>
-        </select>
       </div>
         <div class="input-field">
           <label for="departure">Departure Time</label>
@@ -52,8 +42,6 @@
         <th>Plate Number</th>
         <th>Operation time</th>
         <th>Destination</th>
-        <th>Distance From Destination</th>
-        <th>Estimated Time of Arrival</th>
         <th>Available Seats</th>
         <th>Reserved Seats</th>
         <th>Occupied Seats</th>
@@ -62,7 +50,17 @@
       </thead>
       <tbody id="buses_table"></tbody>
     </table>
-    <script>
+    <script type="module">
+        import {
+  getFirestore,
+  setDoc,
+  getDoc,
+  getDocs,
+  doc,
+  GeoPoint,
+  collection,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.13/firebase-firestore.js";
       const Destinations = [
         {
           location: "Dagupan",
@@ -120,13 +118,18 @@
             Destinations.forEach(destination => {
                 const option = document.createElement('option');
                 option.text = destination.location;
-                option.value = destination.location;
+                option.value = destination.coordinates;
                 destinationSelect.add(option);
             });
         }
-
+        let geopoint=null;
         populateSelect();
+        document.getElementById("ha").addEventListener('click', ()=>{
+            geopoint = destinationSelect.value.split(',');
+            console.log(geopoint[0]);
+            const loc =new GeoPoint(geopoint[0], geopoint[1]);
+            console.log(loc);
+        });
     </script>
-    <script type="module" src="../scripts/buses.js"></script>
   </body>
 </html>

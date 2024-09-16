@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance Matrix API Example</title>
+</head>
+<body>
+    <h1>Distance and Travel Time between Two Points</h1>
+
+    <div id="result">
+        <p><strong>Distance:</strong> <span id="distance">Calculating...</span></p>
+        <p><strong>Estimated Travel Time:</strong> <span id="duration">Calculating...</span></p>
+    </div>
+
+    <script>
+        // Define the API endpoint with your provided URL
+        const apiUrl = "https://api.distancematrix.ai/maps/api/distancematrix/json?origins=15.98203261347679,120.5248903818143&destinations=15.976091577286272,120.57089562910417&key=KI0g89qwGyjqflqUTyKFFfC3aFub5IPflkx4L9sOkGUxqXXRXpeIpuxNII3GI1pf";
+
+        // Function to fetch distance and time data
+        function fetchDistanceAndTime() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Extract the relevant information from the API response
+                    const distance = data.rows[0].elements[0].distance.text;
+                    const duration = data.rows[0].elements[0].duration.text;
+
+                    // Update the HTML with the fetched data
+                    document.getElementById('distance').innerText = distance;
+                    document.getElementById('duration').innerText = duration;
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    document.getElementById('distance').innerText = "Error fetching distance";
+                    document.getElementById('duration').innerText = "Error fetching duration";
+                });
+        }
+
+        // Fetch data as soon as the page loads
+        window.onload = fetchDistanceAndTime;
+    </script>
+</body>
+</html>

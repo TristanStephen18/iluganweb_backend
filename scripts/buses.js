@@ -12,7 +12,7 @@ import {
   doc,
   GeoPoint,
   collection,
-  onSnapshot
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.13/firebase-firestore.js";
 
 // Firebase Configuration
@@ -31,13 +31,66 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const Destinations = [
+  {
+    location: "Dagupan",
+    coordinates: "16.043300, 120.333300",
+  },
+  {
+    location: "Cubao",
+    coordinates: "14.6187, 121.0510",
+  },
+  {
+    location: "Manila",
+    coordinates: "14.5995, 120.9842",
+  },
+  {
+    location: "Cavite",
+    coordinates: "14.4828, 120.9169",
+  },
+  {
+    location: "Taguig",
+    coordinates: "14.5176, 121.0509",
+  },
+  {
+    location: "Manaoag",
+    coordinates: "16.0431, 120.4877",
+  },
+  {
+    location: "Tarlac",
+    coordinates: "15.4802, 120.5979",
+  },
+  {
+    location: "Cabanatuan",
+    coordinates: "15.4860, 120.9675",
+  },
+  {
+    location: "Baguio",
+    coordinates: "16.4023, 120.5960",
+  },
+  {
+    location: "La Union",
+    coordinates: "16.6150, 120.3199",
+  },
+  {
+    location: "Pasay",
+    coordinates: "14.5378, 121.0014",
+  },
+  {
+    location: "Urdaneta",
+    coordinates: "15.9757, 120.5719",
+  },
+];
+
 const addVehicleForm = document.querySelector("#add-vehicle-form");
 let terminalLat = null;
 let terminalLng = null;
 let userid = null;
-let apiKey = 'pk.e6e28e751bd0e401a2a07cb0cbe2e6e4';
+let apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
+const apiKeyDistance = 'KI0g89qwGyjqflqUTyKFFfC3aFub5IPflkx4L9sOkGUxqXXRXpeIpuxNII3GI1pf';
+let origin = null;
 
-addVehicleForm.addEventListener("submit", (e) => {
+addVehicleForm.addEventListener("submit", async (e) => {
   console.log("clicked");
   e.preventDefault();
   const busNumber = addVehicleForm["bus_number"].value;
@@ -45,6 +98,19 @@ addVehicleForm.addEventListener("submit", (e) => {
   const destination = addVehicleForm["destination"].value;
   const departure_time = addVehicleForm["departure"].value;
   const operation_end_time = addVehicleForm["end"].value;
+  let destination_coordinates = null;
+
+
+  Destinations.forEach((value) => {
+    if (destination == value.location) {
+      const coordinates = value.coordinates.split(",");
+      destination_coordinates = new GeoPoint(parseFloat(coordinates[0]), parseFloat(coordinates[1]));
+    }
+  });
+
+  const distance = await getDistance(origin, destination_coordinates);
+  const duration = await getEstimatedTime(origin, destination_coordinates);
+  console.log(`${distance}, ${duration}`);
 
   addDataToFirestore(
     userid,
@@ -54,7 +120,10 @@ addVehicleForm.addEventListener("submit", (e) => {
     terminalLat,
     terminalLng,
     departure_time,
-    operation_end_time
+    operation_end_time,
+    destination_coordinates,
+    distance,
+    duration
   );
   addBusToTrackingBuses(
     userid,
@@ -64,9 +133,39 @@ addVehicleForm.addEventListener("submit", (e) => {
     terminalLat,
     terminalLng,
     departure_time,
-    operation_end_time
+    operation_end_time,
+    destination_coordinates,
+    distance,
+    duration
   );
 });
+
+async function getDistance(origin, end) {
+  try {
+    const response = await fetch(
+      `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${origin.latitude},${origin.longitude}&destinations=${end.latitude},${end.longitude}&key=${apiKeyDistance}`
+    );
+    const data = await response.json();
+    return data.rows[0].elements[0].distance.text;
+  } catch (error) {
+    console.error("Error fetching distance:", error);
+    return null;
+  }
+}
+
+async function getEstimatedTime(origin, end) {
+  try {
+    const response = await fetch(
+      `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${origin.latitude},${origin.longitude}&destinations=${end.latitude},${end.longitude}&key=${apiKeyDistance}`
+    );
+    const data = await response.json();
+    return data.rows[0].elements[0].duration.text;
+  } catch (error) {
+    console.error("Error fetching estimated time:", error);
+    return null;
+  }
+}
+
 
 async function addDataToFirestore(
   companyId,
@@ -76,12 +175,18 @@ async function addDataToFirestore(
   lat,
   lng,
   dep_time,
-  end_op_time
+  end_op_time,
+  destination_coordinates,
+  distance_from_destination,
+  estimated_time_of_arrival,
 ) {
   try {
-    const location = new GeoPoint(15.97485383921185, 120.5579351956326);
+    const location = new GeoPoint(14.618783037942265, 121.0512145711125);
     await setDoc(doc(db, `companies/${companyId}/buses`, plateNumber), {
-      destination,
+      destination: destination,
+      destination_coordinates: destination_coordinates,
+      distance_from_destination: distance_from_destination,
+      estimated_time_of_arrival:estimated_time_of_arrival,
       conductor: "",
       departure_time: dep_time,
       end_operation_time: end_op_time,
@@ -122,12 +227,18 @@ async function addBusToTrackingBuses(
   lat,
   lng,
   dep_time,
-  end_op_time
+  end_op_time,
+  destination_coordinates,
+  distance_from_destination,
+  estimated_time_of_arrival,
 ) {
   try {
     const location = new GeoPoint(terminalLat, terminalLng);
     await setDoc(doc(db, `tracking_buses`, plateNumber), {
-      destination,
+      destination: destination,
+      destination_coordinates: destination_coordinates,
+      distance_from_destination: distance_from_destination,
+      estimated_time_of_arrival:estimated_time_of_arrival,
       conductor: "",
       companyId: companyId,
       departure_time: dep_time,
@@ -158,6 +269,7 @@ async function getTerminalLocation(uid) {
         terminalLat = location.latitude;
         terminalLng = location.longitude;
         console.log("Terminal Location:", terminalLat, terminalLng);
+        origin = new GeoPoint(parseFloat(terminalLat), parseFloat(terminalLng));
       } else {
         console.log("No terminal location found");
       }
@@ -173,33 +285,41 @@ function getBuses(companyId) {
   const busesTableBody = document.getElementById("buses_table");
 
   onSnapshot(collection(db, `companies/${companyId}/buses`), (snapshot) => {
-    busesTableBody.innerHTML = ""; 
+    busesTableBody.innerHTML = "";
     snapshot.forEach(async (doc) => {
       const bus = doc.data();
       const currentLat = bus.current_location.latitude;
       const currentLng = bus.current_location.longitude;
       let address = null;
       let conductor = null;
+      const current_loc = new GeoPoint(parseFloat(currentLat),parseFloat(currentLng));
+      const distance = await getDistance(current_loc, bus.destination_coordinates);
+      console.log(distance);
+      console.log(distance.split(' ')[0]);
 
-      if(currentLat == terminalLat && currentLng == terminalLng){
+      if (currentLat == terminalLat && currentLng == terminalLng) {
         address = "Currently at Terminal";
-      }else{
+      }else if(distance.split(' ')[0] <= 1 && distance.split(' ')[1] == 'km' || distance.split(' ')[1] == 'm'){
+        address = 'Arrived at destination';
+      } else {
         address = await reverseGeocode(currentLat, currentLng);
       }
 
-      if(bus.conductor == ""){
+      if (bus.conductor == "") {
         conductor = "None";
-      }else{
+      } else {
         conductor = bus.conductor;
       }
 
       const row = document.createElement("tr");
-      
+
       row.innerHTML = `
         <td>${bus.bus_number}</td>
         <td>${bus.plate_number}</td>
         <td>${bus.departure_time} am - ${bus.end_operation_time} pm</td>
         <td>${bus.destination}</td>
+        <td>${bus.distance_from_destination}</td>
+        <td>${bus.estimated_time_of_arrival}</td>
         <td>${bus.available_seats}</td>
         <td>${bus.reserved_seats}</td>
         <td>${bus.occupied_seats}</td>
@@ -207,14 +327,14 @@ function getBuses(companyId) {
         <td>${address}</td>  <!-- New Address Column -->
       `;
 
-      busesTableBody.appendChild(row); 
+      busesTableBody.appendChild(row);
     });
   });
 }
 
 // Function to reverse geocode the bus's current location using LocationIQ API
 async function reverseGeocode(lat, lon) {
-  const apiKey = 'pk.e6e28e751bd0e401a2a07cb0cbe2e6e4';
+  const apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
   const url = `https://us1.locationiq.com/v1/reverse.php?key=${apiKey}&lat=${lat}&lon=${lon}&format=json`;
 
   try {
@@ -222,10 +342,9 @@ async function reverseGeocode(lat, lon) {
     const data = await response.json();
     return data.display_name; // Return the address from the response
   } catch (error) {
-    console.error('Error fetching address:', error);
-    return 'Address not available';
+    console.error("Error fetching address:", error);
+    return "Address not available";
   }
 }
-
 
 window.onload = checkUser;
