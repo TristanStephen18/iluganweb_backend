@@ -181,13 +181,13 @@ async function getBuses(companyId) {
             busLocation.latitude !== terminalLat &&
             busLocation.longitude !== terminalLng
           ) {
-            icon = "iconr.png";
+            icon = "../images/iconr.png";
             moving_buses_counter++; // Count moving buses
           } else if (
             busLocation.latitude === terminalLat &&
             busLocation.longitude === terminalLng
           ) {
-            icon = "iconb.png";
+            icon = "../images/iconb.png";
             parked_buses++; // Count parked buses
           }
           addBusToMap(position, icon, busData.available_seats, busData.reserved_seats, busData.conductor, busData.occupied_seats, busData.destination, busData.bus_number, busData.plate_number);

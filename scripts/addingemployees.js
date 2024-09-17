@@ -74,6 +74,15 @@ async function addDataToFirestore(empId, emp_name, email, password, type) {
   try {
     console.log(userid);
     await setDoc(doc(db, `companies/${userid}/employees`, empId), {
+      employee_name: emp_name,
+      id: empId,
+      email: email,
+      password: password,
+      type: type,
+    });
+    await setDoc(doc(db, `ilugan_mobile_users`, empId), {
+      companyId: userid,
+      employee_name: emp_name,
       id: empId,
       email: email,
       password: password,
