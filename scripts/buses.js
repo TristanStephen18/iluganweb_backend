@@ -257,7 +257,6 @@ async function addBusToTrackingBuses(
   }
 }
 
-// Fetch Terminal Location
 async function getTerminalLocation(uid) {
   try {
     const docRef = doc(db, "companies", uid);
@@ -294,14 +293,18 @@ function getBuses(companyId) {
       let conductor = null;
       const current_loc = new GeoPoint(parseFloat(currentLat),parseFloat(currentLng));
       const distance = await getDistance(current_loc, bus.destination_coordinates);
+      const duration = await getEstimatedTime(current_loc, bus.destination_coordinates);
+      
       console.log(distance);
       console.log(distance.split(' ')[0]);
 
       if (currentLat == terminalLat && currentLng == terminalLng) {
         address = "Currently at Terminal";
-      }else if(distance.split(' ')[0] <= 1 && distance.split(' ')[1] == 'km' || distance.split(' ')[1] == 'm'){
+      }else if(parseInt(distance.split(' ')[0]) <= 1 && distance.split(' ')[1] == 'km'){
+        address = 'Nearing destination';
+      } else if(parseInt(distance.split(' ')[0]) <= 1 && distance.split(' ')[1] == 'm'){
         address = 'Arrived at destination';
-      } else {
+      }else {
         address = await reverseGeocode(currentLat, currentLng);
       }
 
@@ -318,8 +321,8 @@ function getBuses(companyId) {
         <td>${bus.plate_number}</td>
         <td>${bus.departure_time} am - ${bus.end_operation_time} pm</td>
         <td>${bus.destination}</td>
-        <td>${bus.distance_from_destination}</td>
-        <td>${bus.estimated_time_of_arrival}</td>
+        <td>${distance}</td>
+        <td>${duration}</td>
         <td>${bus.available_seats}</td>
         <td>${bus.reserved_seats}</td>
         <td>${bus.occupied_seats}</td>
@@ -332,7 +335,6 @@ function getBuses(companyId) {
   });
 }
 
-// Function to reverse geocode the bus's current location using LocationIQ API
 async function reverseGeocode(lat, lon) {
   const apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
   const url = `https://us1.locationiq.com/v1/reverse.php?key=${apiKey}&lat=${lat}&lon=${lon}&format=json`;

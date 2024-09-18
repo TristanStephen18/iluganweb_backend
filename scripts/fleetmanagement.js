@@ -12,6 +12,7 @@ import {
   doc,
   GeoPoint,
   collection,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.13/firebase-firestore.js";
 
 // Firebase Configuration
@@ -40,9 +41,6 @@ let terminalLat = null;
 let terminalLng = null;
 let userid = null;
 let buses = [];
-let bus_counter = 0;
-let moving_buses_counter = 0;
-let parked_buses = 0;
 let icon = "";
 
 async function reverseGeocode(lat, lng) {
@@ -59,9 +57,17 @@ async function reverseGeocode(lat, lng) {
   }
 }
 
-async function showBusInfo(busNumber, plateNumber, current_loc, seats_avail, seats_res, occu_seats, conduct, destin) {
-
-  if(conduct == ""){
+async function showBusInfo(
+  busNumber,
+  plateNumber,
+  current_loc,
+  seats_avail,
+  seats_res,
+  occu_seats,
+  conduct,
+  destin
+) {
+  if (conduct == "") {
     conduct = "NO condcutor yet";
   }
   document.getElementById("busNumber").innerText = busNumber;
@@ -71,7 +77,7 @@ async function showBusInfo(busNumber, plateNumber, current_loc, seats_avail, sea
   document.getElementById("availableSeats").innerText = seats_avail;
   document.getElementById("reservedSeats").innerText = seats_res;
   document.getElementById("conductorName").innerText = conduct;
-  document.getElementById("driverName").innerText = "Driver"; 
+  document.getElementById("driverName").innerText = "Driver";
 
   const busInfoContainer = document.getElementById("busInfoContainer");
   busInfoContainer.classList.remove("hidden");
@@ -82,7 +88,17 @@ async function showBusInfo(busNumber, plateNumber, current_loc, seats_avail, sea
   });
 }
 
-async function addBusToMap(position, icon, avail, res, cond, occ,  endpoint, busNum, plateNum) {
+async function addBusToMap(
+  position,
+  icon,
+  avail,
+  res,
+  cond,
+  occ,
+  endpoint,
+  busNum,
+  plateNum
+) {
   const marker = new google.maps.Marker({
     position,
     map: map,
@@ -96,14 +112,16 @@ async function addBusToMap(position, icon, avail, res, cond, occ,  endpoint, bus
   const lat = position.lat;
   const lng = position.lng;
 
-  if(lat == terminalLat && lng == terminalLng){
+  if (lat == terminalLat && lng == terminalLng) {
     address = "Currently at Terminal";
-  }else {
+  } else {
     address = await reverseGeocode(lat, lng);
+    if(address =='undefined'){
+      address = 'Failed to Reverse Geocode';
+    }
   }
 
   marker.addListener("click", () => {
-    // alert(`${busNum}, ${plateNum},${address}, ${avail}, ${res}, ${occ}, ${cond}, ${endpoint}`);
     showBusInfo(busNum, plateNum, address, avail, res, occ, cond, endpoint);
   });
 
@@ -125,7 +143,6 @@ function checkUser() {
   });
 }
 
-// // Fetch Terminal Location
 async function getTerminalLocation(uid) {
   try {
     const docRef = doc(db, "companies", uid);
@@ -151,81 +168,89 @@ async function getTerminalLocation(uid) {
 // Fetch Buses
 async function getBuses(companyId) {
   buses = []; // Reset buses array
-  bus_counter = 0; // Reset the counters
-  moving_buses_counter = 0;
-  parked_buses = 0;
 
   try {
     const documentRef = collection(db, `companies/${companyId}/buses`);
-    const snapshot = await getDocs(documentRef);
 
-    if (snapshot.empty) {
-      console.log("No buses found");
-    } else {
-      snapshot.forEach((doc) => {
-        const busData = doc.data();
-        const busLocation = busData.current_location;
+    // Real-time updates using onSnapshot
+    onSnapshot(documentRef, (snapshot) => {
+      let bus_counter = 0;
+      let moving_buses_counter = 0;
+      let parked_buses = 0;
 
-        if (busLocation?.latitude && busLocation?.longitude) {
-          const position = {
-            lat: busLocation.latitude,
-            lng: busLocation.longitude,
-          };
-          bus_counter++; // Increment total bus counter
-          console.log(
-            `buslat: ${busLocation.latitude} buslong: ${busLocation.longitude}`
-          );
-          console.log(`${terminalLat}, ${terminalLng}`);
+      // Clear existing markers from the map
+      buses.forEach((marker) => marker.setMap(null));
+      buses = [];
 
-          if (
-            busLocation.latitude !== terminalLat &&
-            busLocation.longitude !== terminalLng
-          ) {
-            icon = "../images/iconr.png";
-            moving_buses_counter++; // Count moving buses
-          } else if (
-            busLocation.latitude === terminalLat &&
-            busLocation.longitude === terminalLng
-          ) {
-            icon = "../images/iconb.png";
-            parked_buses++; // Count parked buses
+      if (snapshot.empty) {
+        console.log("No buses found");
+      } else {
+        snapshot.forEach((doc) => {
+          const busData = doc.data();
+          const busLocation = busData.current_location;
+
+          if (busLocation?.latitude && busLocation?.longitude) {
+            const position = {
+              lat: busLocation.latitude,
+              lng: busLocation.longitude,
+            };
+
+            bus_counter++; // Increment total bus counter
+
+            if (
+              busLocation.latitude !== terminalLat &&
+              busLocation.longitude !== terminalLng
+            ) {
+              icon = "../images/iconr.png";
+              moving_buses_counter++; // Count moving buses
+            } else {
+              icon = "../images/iconb.png";
+              parked_buses++; // Count parked buses
+            }
+            addBusToMap(
+              position,
+              icon,
+              busData.available_seats,
+              busData.reserved_seats,
+              busData.conductor,
+              busData.occupied_seats,
+              busData.destination,
+              busData.bus_number,
+              busData.plate_number
+            );
+
+            console.log(
+              `Bus Number: ${busData.bus_number}, Plate: ${busData.plate_number}`
+            );
           }
-          addBusToMap(position, icon, busData.available_seats, busData.reserved_seats, busData.conductor, busData.occupied_seats, busData.destination, busData.bus_number, busData.plate_number);
-          // Add bus marker to the map
-        }
+        });
+      }
 
-        console.log(
-          `Bus Number: ${busData.bus_number}, Plate: ${busData.plate_number}`
-        );
-      });
-    }
+      // Update HTML elements after counters are calculated
+      const tracking_buses = document.getElementById("number_of_buses");
+      const parked_buses_counter = document.getElementById("parked_b");
+      const moving_buses_element = document.getElementById("moving");
+
+      tracking_buses.innerText = bus_counter;
+      parked_buses_counter.innerText = parked_buses;
+      moving_buses_element.innerText = moving_buses_counter;
+    });
   } catch (error) {
     console.error("Error fetching buses: ", error);
   }
-
-  // Update HTML elements
-  const tracking_buses = document.getElementById("number_of_buses");
-  const parked_buses_counter = document.getElementById("parked_b");
-  const moving_buses_element = document.getElementById("moving"); // Rename to avoid conflicts
-
-  // Update the counters in the UI
-  tracking_buses.innerText = bus_counter;
-  parked_buses_counter.innerText = parked_buses;
-  moving_buses_element.innerText = moving_buses_counter;
 }
 
-const tracking_buses = document.getElementById("number_of_buses");
-const parked_buses_counter = document.getElementById("parked_b");
-const moving_buses = document.getElementById("moving");
 
-// console.log(bus_counter);
-// console.log(tracking_buses.value);
-console.log(moving_buses_counter);
-console.log(parked_buses);
+// const tracking_buses = document.getElementById("number_of_buses");
+// const parked_buses_counter = document.getElementById("parked_b");
+// const moving_buses = document.getElementById("moving");
 
-tracking_buses.innerText = bus_counter;
-parked_buses_counter.innerText = parked_buses;
+// console.log(moving_buses_counter);
+// console.log(parked_buses);
 
-tracking_buses.value = `${bus_counter}`;
-// Initialize on page load
+// tracking_buses.innerText = bus_counter;
+// parked_buses_counter.innerText = parked_buses;
+
+// tracking_buses.value = `${bus_counter}`;
+
 window.onload = checkUser;
