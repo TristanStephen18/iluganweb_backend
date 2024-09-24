@@ -3,6 +3,7 @@ const Destinations = [
         location: "Dagupan",
         coordinates: '16.043300, 120.333300'
     },
+    
     {
         location: "Cubao",
         coordinates: '14.6187, 121.0510'

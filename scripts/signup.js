@@ -52,6 +52,7 @@ snpform.addEventListener("submit", (e) => {
           terminal_location: location,
           email: mail,
           password: pass,
+          login_counter: 0,
         });
         alert("Account Created Successfully");
         window.location.assign("login.html");

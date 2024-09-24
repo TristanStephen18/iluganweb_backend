@@ -41,12 +41,15 @@ add_employee_form.addEventListener("submit", async (e) => {
   const emp_password = add_employee_form["password"].value;
   const emp_type = add_employee_form["employee_type"].value;
   const employee_name = add_employee_form["name"].value;
+  let emp_userId = null;
 
   try {
     await createUserWithEmailAndPassword(auth, emp_email, emp_password).then((cred)=>{
         console.log("New employee account created.");
+       emp_userId = cred.user.uid;
     });
     await addDataToFirestore(
+        emp_userId,
         employee_id,
         employee_name,
         emp_email,
@@ -70,23 +73,24 @@ add_employee_form.addEventListener("submit", async (e) => {
   }
 });
 
-async function addDataToFirestore(empId, emp_name, email, password, type) {
+async function addDataToFirestore(id, empId, emp_name, email, password, type) {
   try {
     console.log(userid);
-    await setDoc(doc(db, `companies/${userid}/employees`, empId), {
+    await setDoc(doc(db, `companies/${userid}/employees`, id), {
       employee_name: emp_name,
       id: empId,
       email: email,
       password: password,
       type: type,
     });
-    await setDoc(doc(db, `ilugan_mobile_users`, empId), {
+    await setDoc(doc(db, `ilugan_mobile_users`, id), {
       companyId: userid,
       employee_name: emp_name,
       id: empId,
       email: email,
       password: password,
       type: type,
+      inbus: "",
     });
     alert("Employee Added");
   } catch (error) {

@@ -87,7 +87,7 @@ let terminalLat = null;
 let terminalLng = null;
 let userid = null;
 let apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
-const apiKeyDistance = 'KI0g89qwGyjqflqUTyKFFfC3aFub5IPflkx4L9sOkGUxqXXRXpeIpuxNII3GI1pf';
+const apiKeyDistance = 'e3NCLlL8P5m5Q3i5vCiFCaHLaoZdMEN1qJ1IK83FxzaBOAYmi8l5dHJXp0qyHzFc';
 let origin = null;
 
 addVehicleForm.addEventListener("submit", async (e) => {
