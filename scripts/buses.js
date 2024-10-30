@@ -13,7 +13,7 @@ import {
   GeoPoint,
   collection,
   onSnapshot,
-} from "https://www.gstatic.com/firebasejs/10.13/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -87,7 +87,7 @@ let terminalLat = null;
 let terminalLng = null;
 let userid = null;
 let apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
-const apiKeyDistance = 'e3NCLlL8P5m5Q3i5vCiFCaHLaoZdMEN1qJ1IK83FxzaBOAYmi8l5dHJXp0qyHzFc';
+const apiKeyDistance = '32OQ6PekD6m1FLGbx3KHHIF21E7sRGpuk9CU3urbZMsDPzaCvDTfTuqjaS2o24fF';
 let origin = null;
 
 addVehicleForm.addEventListener("submit", async (e) => {
@@ -181,7 +181,7 @@ async function addDataToFirestore(
   estimated_time_of_arrival,
 ) {
   try {
-    const location = new GeoPoint(14.618783037942265, 121.0512145711125);
+    const location = new GeoPoint(terminalLat, terminalLng);
     await setDoc(doc(db, `companies/${companyId}/buses`, plateNumber), {
       destination: destination,
       destination_coordinates: destination_coordinates,

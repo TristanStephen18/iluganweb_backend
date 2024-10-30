@@ -13,7 +13,8 @@ import {
   GeoPoint,
   collection,
   onSnapshot,
-} from "https://www.gstatic.com/firebasejs/10.13/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -27,14 +28,10 @@ const firebaseConfig = {
 };
 
 // Firebase Initialization
-const apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4"; // Replace with your actual API key
-
-// URL encode the query and create the API URL
-// const apiUrl = `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(
-// )}&format=json`;
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const database = getDatabase(app);
 
 // Global Variables
 let terminalLat = null;
@@ -43,6 +40,29 @@ let userid = null;
 let buses = [];
 let icon = "";
 
+// Function to fetch GPS coordinates from Realtime Database
+function getBusLocationFromRealtimeDB(avail, reserved, conductor, occupied, destin, busnum,  platenum) {
+  const gpsRef = ref(database, 'gps');
+  
+  onValue(gpsRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const lat = data.lat;
+      const lng = data.long;
+      console.log("Realtime Database GPS coordinates:", lat, lng);
+      
+      // Use these coordinates to add the bus marker on the map
+      const position = { lat: lat, lng: lng };
+      addBusToMap(position, icon, avail, reserved, conductor, occupied, destin, busnum, platenum);
+    } else {
+      console.log("No data available in Realtime Database");
+    }
+  }, (error) => {
+    console.error("Error fetching data from Realtime Database:", error);
+  });
+}
+
+// Function to reverse geocode the location
 async function reverseGeocode(lat, lng) {
   try {
     const apiKey = "pk.e6e28e751bd0e401a2a07cb0cbe2e6e4";
@@ -57,6 +77,7 @@ async function reverseGeocode(lat, lng) {
   }
 }
 
+// Function to show bus information
 async function showBusInfo(
   busNumber,
   plateNumber,
@@ -68,7 +89,7 @@ async function showBusInfo(
   destin
 ) {
   if (conduct == "") {
-    conduct = "NO condcutor yet";
+    conduct = "NO conductor yet";
   }
   document.getElementById("busNumber").innerText = busNumber;
   document.getElementById("plateNumber").innerText = plateNumber;
@@ -88,6 +109,7 @@ async function showBusInfo(
   });
 }
 
+// Function to add a bus marker on the map
 async function addBusToMap(
   position,
   icon,
@@ -116,7 +138,7 @@ async function addBusToMap(
     address = "Currently at Terminal";
   } else {
     address = await reverseGeocode(lat, lng);
-    if(address =='undefined'){
+    if(address == 'undefined') {
       address = 'Failed to Reverse Geocode';
     }
   }
@@ -128,12 +150,12 @@ async function addBusToMap(
   buses.push(marker);
 }
 
+// Function to check user authentication
 function checkUser() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       console.log("User is logged in:", user.uid);
       userid = user.uid;
-      //
       getTerminalLocation(userid);
       getBuses(userid);
     } else {
@@ -143,6 +165,7 @@ function checkUser() {
   });
 }
 
+// Function to get terminal location from Firestore
 async function getTerminalLocation(uid) {
   try {
     const docRef = doc(db, "companies", uid);
@@ -165,7 +188,7 @@ async function getTerminalLocation(uid) {
   }
 }
 
-// Fetch Buses
+// Function to get buses from Firestore
 async function getBuses(companyId) {
   buses = []; // Reset buses array
 
@@ -207,17 +230,31 @@ async function getBuses(companyId) {
               icon = "../images/iconb.png";
               parked_buses++; // Count parked buses
             }
-            addBusToMap(
-              position,
-              icon,
-              busData.available_seats,
-              busData.reserved_seats,
-              busData.conductor,
-              busData.occupied_seats,
-              busData.destination,
-              busData.bus_number,
-              busData.plate_number
-            );
+
+            // Skip a specific bus to fetch its coordinates from Realtime DB
+            if(busData.bus_number == 'BUS 1231') {
+              getBusLocationFromRealtimeDB(
+                busData.available_seats,
+                busData.reserved_seats,
+                busData.conductor,
+                busData.occupied_seats,
+                busData.destination,
+                busData.bus_number,
+                busData.plate_number
+              );  // Fetch coordinates from Realtime Database
+            } else {
+              addBusToMap(
+                position,
+                icon,
+                busData.available_seats,
+                busData.reserved_seats,
+                busData.conductor,
+                busData.occupied_seats,
+                busData.destination,
+                busData.bus_number,
+                busData.plate_number
+              );
+            }
 
             console.log(
               `Bus Number: ${busData.bus_number}, Plate: ${busData.plate_number}`
@@ -239,18 +276,5 @@ async function getBuses(companyId) {
     console.error("Error fetching buses: ", error);
   }
 }
-
-
-// const tracking_buses = document.getElementById("number_of_buses");
-// const parked_buses_counter = document.getElementById("parked_b");
-// const moving_buses = document.getElementById("moving");
-
-// console.log(moving_buses_counter);
-// console.log(parked_buses);
-
-// tracking_buses.innerText = bus_counter;
-// parked_buses_counter.innerText = parked_buses;
-
-// tracking_buses.value = `${bus_counter}`;
 
 window.onload = checkUser;

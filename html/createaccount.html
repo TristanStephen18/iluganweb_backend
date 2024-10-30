@@ -15,10 +15,6 @@
           <input type="text" id="company" />
         </div>
         <br />
-        <p>Select your terminal location on the map</p>
-        <div id="map"></div>
-
-        <br />
         <div class="input-field">
           <label for="email">Company Email:</label>
           <input type="email" id="email" required />
@@ -32,49 +28,37 @@
         <button id="signupbtn">Create Account</button>
       </form>
     </div>
-
-    <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIMuBkc8a_ciIOnIBA5n-3z5A85agZfQ0&callback=initMap&libraries=places&v=weekly"
-      defer
-    ></script>
-    <script>
-      let currentMarker = null;
-      let map;
-      let selectedLat = null;
-      let selectedLng = null;
-
-      function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat: 16.056575294903435, lng: 120.32326714096962 },
-          zoom: 14,
-        });
-
-        map.addListener("click", (e) => {
-          const position = {
-            lat: e.latLng.lat(),
-            lng: e.latLng.lng(),
-          };
-
-          selectedLat = e.latLng.lat();
-          selectedLng = e.latLng.lng();
-
-          // document.getElementById("lat").value = lat;
-          // document.getElementById("long").value = lng;
-
-          if (currentMarker) {
-            currentMarker.setMap(null);
-          }
-
-          currentMarker = new google.maps.Marker({
-            position: position,
-            map: map,
-            icon: {
-              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-            },
-          });
-        });
-      }
-    </script>
+    <!-- Modal -->
+    <div class="modal" id="subscriptionModal">
+      <div class="modal-content">
+        <h3>Select a Subscription Plan</h3>
+        <div class="subscription-card" data-price="120000" data-plan="Annual">
+          <h4>Annual Plan</h4>
+          <p>$1200/year</p>
+        </div>
+        <div
+          class="subscription-card"
+          data-price="700000"
+          data-plan="Semi-Annual"
+        >
+          <h4>Semi-Annual Plan</h4>
+          <p>$700/6 months</p>
+        </div>
+        <div
+          class="subscription-card"
+          data-price="400000"
+          data-plan="Quarterly"
+        >
+          <h4>Quarterly Plan</h4>
+          <p>$400/3 months</p>
+        </div>
+        <button id="payNowBtn">Pay Now</button>
+        <div class="promp" style="display: none">
+          <h2>Processing payment</h2>
+        </div>
+        <div class="loader"></div>
+      </div>
+    </div>
     <script src="../scripts/signup.js" type="module"></script>
   </body>
 </html>
