@@ -72,13 +72,15 @@ async function updateadmindata(id, mail, pass, comp, subscriptionType, expiryDat
       amountpayable: amount,
       paid: true
     });
+
+    // await setDoc(doc(db, 'admin/admin1/', ))
   } catch (error) {
-    // Swal.fire({
-    //   title: "Error",
-    //   text: error,
-    //   icon: "error",
-    //   confirmButtonText: "OK",
-    // });
+    Swal.fire({
+      title: "Error",
+      text: error,
+      icon: "error",
+      confirmButtonText: "OK",
+    });
   }
 }
 
@@ -195,6 +197,7 @@ snpform.addEventListener("submit", (e) => {
                   createUserWithEmailAndPassword(auth, email, password)
                     .then((cred) => {
                       addData(cred.user.uid, email, password, company, selectedPlan, expiryDate);
+                      updateadmindata(cred.user.uid, email, password, company, selectedPlan, expiryDate, (parseFloat(selectedPrice)/100));
                       loader.style.display = "none";
                       promp.style.display = "none";
                     })
