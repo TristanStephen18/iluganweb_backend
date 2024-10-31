@@ -18,12 +18,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+const currentDate = new Date();
+const formattedDate = currentDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit'
+});
+
+// console.log(formattedDate);
+
 import {
   getFirestore,
   setDoc,
   doc,
   GeoPoint,
-  Timestamp
+  Timestamp,
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 const db = getFirestore();
@@ -60,8 +71,9 @@ async function addData(id, mail, pass, comp, subscriptionType, expiryDate) {
   }
 }
 
-async function updateadmindata(id, mail, pass, comp, subscriptionType, expiryDate, amount) {
+async function updateAdminData(id, mail, pass, comp, subscriptionType, expiryDate, amount) {
   try {
+    // Set the company data under `admin/admin1/companies`
     await setDoc(doc(db, "admin/admin1/companies", comp), {
       company_name: comp,
       terminal_location: null,
@@ -73,17 +85,40 @@ async function updateadmindata(id, mail, pass, comp, subscriptionType, expiryDat
       paid: true
     });
 
-    // await setDoc(doc(db, 'admin/admin1/', ))
+    // Define reference to the 'ilugan/data' document
+    const iluganDocRef = doc(db, 'admin/admin1/ilugan', formattedDate);
+
+    // Attempt to fetch the existing document
+    const iluganDocSnap = await getDoc(iluganDocRef);
+
+    if (iluganDocSnap.exists()) {
+      // If document exists, update existing values
+      const currentData = iluganDocSnap.data();
+      
+      // Update total revenue by adding the new amount
+      await updateDoc(iluganDocRef, {
+        totalrevenue: currentData.totalrevenue + amount,
+        webusers: currentData.webusers + 1,
+        mobileusers: currentData.mobileusers + 1
+      });
+    } else {
+      // If document doesn't exist, create it with initial values
+      await setDoc(iluganDocRef, {
+        totalrevenue: amount,
+        webusers: 1,
+        mobileusers: 1
+      });
+    }
+    addData(id, mail, pass, comp, subscriptionType, expiryDate);
   } catch (error) {
     Swal.fire({
       title: "Error",
-      text: error,
+      text: error.message,
       icon: "error",
       confirmButtonText: "OK",
     });
   }
 }
-
 
 
 function getSubscriptionExpiry(subscriptionType) {
@@ -196,8 +231,8 @@ snpform.addEventListener("submit", (e) => {
                   clearInterval(checkStatusInterval); // Stop polling
                   createUserWithEmailAndPassword(auth, email, password)
                     .then((cred) => {
-                      addData(cred.user.uid, email, password, company, selectedPlan, expiryDate);
-                      updateadmindata(cred.user.uid, email, password, company, selectedPlan, expiryDate, (parseFloat(selectedPrice)/100));
+                      // addData(cred.user.uid, email, password, company, selectedPlan, expiryDate);
+                      updateAdminData(cred.user.uid, email, password, company, selectedPlan, expiryDate, (parseFloat(selectedPrice)/100));
                       loader.style.display = "none";
                       promp.style.display = "none";
                     })
